@@ -42,14 +42,10 @@ public class UserService {
         return this.userRepository.findById(id).orElseThrow(() -> new Exception("Usuário não encontrado"));
     }
 
-    public void validateUser(Users payeer, BigDecimal amount) throws Exception{
-        if(payeer.getUserType() == UserType.MERCHANT){
+    public void validateUser(Users payer, BigDecimal amount) throws Exception{
+        if(payer.getUserType() == UserType.MERCHANT){
             throw new Exception("Lojistas não podem realizar transações");
-
         }
 
-        if(payeer.getBalance().compareTo(amount) < 0){
-            throw new Exception("Saldo Insuficiente");
-        }
     }
 }

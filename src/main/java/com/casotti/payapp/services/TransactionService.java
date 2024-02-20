@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,7 @@ public class TransactionService {
 
         boolean isAuthorize = authorizedTransaction();
 
-        if(isAuthorize){
+        if(!isAuthorize){
             throw new Exception("Transação não autorizada");
         }
 
@@ -50,6 +52,10 @@ public class TransactionService {
 
         payer.setBalance(payer.getBalance().subtract(transactionDTO.amount()));
         payee.setBalance(payee.getBalance().subtract(transactionDTO.amount()));
+
+        if(!isSufficientBalance(payer, transactionDTO.amount())){
+            throw new Exception("Saldo Insuficiente");
+        }
 
         notificationService.SendNotification(payer, "Transação realizada com sucesso!");
         notificationService.SendNotification(payee, "Transação recebida com sucesso");
@@ -65,13 +71,28 @@ public class TransactionService {
         return this.transactionRepository.findAll();
     }
 
+    public Transaction getTransactionById(Long id)  throws Exception {
+        if (id == null) {
+            throw new Exception("O id não corresponde a nenhuma transação");
+        }
+
+        return this.transactionRepository.findById(id).orElseThrow( () -> new RuntimeException("Transação encontrada!"));
+    }
+
     public boolean authorizedTransaction(){
         var response = restTemplate.getForEntity("https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc", Map.class);
 
-        if(response.getStatusCode() == HttpStatus.OK){
+        if (response != null && response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             String message = (String) response.getBody().get("message");
             return "Autorizado".equalsIgnoreCase(message);
-        } else return false;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isSufficientBalance(Users payer, BigDecimal amount){
+        BigDecimal balanceAfterTransaction = payer.getBalance().subtract(amount);
+        return balanceAfterTransaction.compareTo(BigDecimal.ZERO) >= 0;
     }
 
 }

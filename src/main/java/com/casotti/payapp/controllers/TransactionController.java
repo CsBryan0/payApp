@@ -28,4 +28,11 @@ public class TransactionController {
         var transactions = transactionService.getAllTransactions();
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity<Transaction> getTransactionById(@PathVariable (value = "id") Long id) throws Exception {
+            var transactions = this.transactionService.getTransactionById(id);
+            return new ResponseEntity<>(transactions, HttpStatus.OK);
+    }
+
 }
