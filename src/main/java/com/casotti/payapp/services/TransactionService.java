@@ -51,14 +51,20 @@ public class TransactionService {
         newTransaction.setTimeStamp(LocalDateTime.now());
 
         payer.setBalance(payer.getBalance().subtract(transactionDTO.amount()));
-        payee.setBalance(payee.getBalance().subtract(transactionDTO.amount()));
+        payee.setBalance(payee.getBalance().add(transactionDTO.amount()));
 
         if(!isSufficientBalance(payer, transactionDTO.amount())){
             throw new Exception("Saldo Insuficiente");
         }
 
-        notificationService.SendNotification(payer, "Transação realizada com sucesso!");
-        notificationService.SendNotification(payee, "Transação recebida com sucesso");
+       try {
+           boolean notificationSent = notificationService.sendNotification();
+           if (!notificationSent){
+               System.out.println("Falha no envio de notificação");
+           }
+       } catch (Exception e){
+           System.out.println("Erro ao enviar a notificação" + e.getMessage());
+       }
 
         this.transactionRepository.save(newTransaction);
         this.userService.saveUser(payer);

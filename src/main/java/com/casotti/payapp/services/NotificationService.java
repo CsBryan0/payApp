@@ -16,27 +16,17 @@ public class NotificationService {
     @Autowired
     private RestTemplate restTemplate;;
 
-    public void SendNotification(Users user, String message){
+    public boolean sendNotification(){
+        var response = restTemplate.getForEntity("https://run.mocky.io/v3/54dc2cf1-3add-45b5-b5a9-6bf7e7f1f4a6", Map.class);
 
-        boolean sendNotification = verifyNotification();
-
-        if(!sendNotification){
-            throw new RuntimeException("Serviço de mensagens fora do ar");
-        }
-
-        String email = user.getEmail();
-        System.out.println(email + " " + message);
-    }
-
-    public boolean verifyNotification(){
-
-        var notification = restTemplate.getForEntity("https://run.mocky.io/v3/54dc2cf1-3add-45b5-b5a9-6bf7e7f1f4a6", Map.class);
-
-        if(notification.getStatusCode() == HttpStatus.OK){
-            String message = (String) notification.getBody().get("message");
-            return true;
+        if (response != null && response.getStatusCode() == HttpStatus.OK && response.getBody() != null){
+            Boolean sucess = (Boolean) response.getBody().get("message");
+            return sucess != null && sucess;
         } else {
             return false;
         }
     }
+
+
+
 }
