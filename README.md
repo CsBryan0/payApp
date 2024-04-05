@@ -83,6 +83,4 @@ Realiza uma transferência de dinheiro entre dois usuários.
   - Usuário que paga (payer)
   - Usuário que recebe (payee)
 
-## Autor
 
-Seu Nome - [Link do Linkedin](https://www.linkedin.com/in/bryan-souza-093b3b1b9/)
